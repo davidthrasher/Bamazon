@@ -1,7 +1,9 @@
+//NPM requirements
 var inquirer = require("inquirer");
 var mysql = require("mysql");
 var colors = require("colors");
 
+//Storing credentials into connection variable
 var connection = mysql.createConnection({
   host: "localhost",
   port: 3306,
@@ -10,31 +12,35 @@ var connection = mysql.createConnection({
   database: "bamazon"
 });
 
+//Establishing MySql connection
 connection.connect(function(err) {
   if (err) throw err;
   console.log("Connected as id: ".bold + connection.threadId);
 });
 
+//Main Function that prints all items available for sale to the user, then runs the salePrompt() function
 function mainFunctionality() {
 
   connection.query("SELECT * FROM products", function(err, res) {
     if (err) throw err;
-    console.log("Checkout the items we have for sale:\n".white.bold);
+    console.log("Checkout the items we have for sale:\n".bold);
     console.log("\n-----------------------------------------\n");
     for (var i = 0; i < res.length; i++) {
-      console.log(res[i].item_id + " | " + res[i].product_name + " | " + res[i].department_name + " | " + "$".green +res[i].price + " | " + res[i].stock_quantity);
+      console.log("Id: ".bold + res[i].item_id + " | Product: ".bold + res[i].product_name + " | Department: ".bold + res[i].department_name + " | Price: ".bold + "$".green.bold +res[i].price + " | QOH: ".bold + res[i].stock_quantity);
     }
     console.log("\n-----------------------------------------\n");
   });
   salePrompt();
 }
 
+//Function that prompts user to pick an item to purchase and then asks them the quantity of the item they would like to purchase//
+//Validates that there is enough QOH to fulfill customer's order, then totals up the price with 7% sales tax//
 function salePrompt() {
   inquirer.prompt([
         {
              name: "id",
              type: "input",
-             message: "Which item would you like to purchase? (Enter id number associated with desired item.)\n".white.bold,
+             message: "Which item would you like to purchase? (Enter id number associated with desired item.)\n".bold,
              validate: function(value) {
                  if (isNaN(value) === false) {
                      return true;
@@ -46,7 +52,7 @@ function salePrompt() {
          {
              name: "quantity",
              type: "input",
-             message: "How many would you like to purchase?\n".white.bold,
+             message: "How many would you like to purchase?\n".bold,
              validate: function(value) {
                  if (isNaN(value)) {
                      return false;
@@ -69,14 +75,14 @@ function salePrompt() {
 
                         if (err) throw err;
                         console.log("\n-----------------------------------------\n");
-                        console.log("Success! Your total is ".white.bold + "$" + purchasePrice + "\nYour item(s) will arrive soon!".white.bold);
+                        console.log("Success! Your total is ".bold + "$" + purchasePrice + "\nYour item(s) will arrive soon!".bold);
                         console.log("\n-----------------------------------------\n");
                     });
                 mainFunctionality();
         }
         else {
                 console.log("\n-----------------------------------------\n");
-                console.log("Sorry, we do not currently have enough of this item to fulfill that amount.".white.bold);
+                console.log("Sorry, we do not currently have enough of this item to fulfill that amount.".bold);
                 console.log("\n-----------------------------------------\n");
 
                 mainFunctionality();
@@ -87,4 +93,5 @@ function salePrompt() {
     });
 }
 
+//Start shopping!!//
 mainFunctionality();

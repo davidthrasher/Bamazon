@@ -1,7 +1,9 @@
+//NPM requirements
 var inquirer = require("inquirer");
 var mysql = require("mysql");
+var colors = require("colors");
 
-
+//Storing credentials into connection variable
 var connection = mysql.createConnection({
   host: "localhost",
   port: 3306,
@@ -10,12 +12,14 @@ var connection = mysql.createConnection({
   database: "bamazon"
 });
 
+//Establishing MySql connection
 connection.connect(function(err) {
   if (err) throw err;
   console.log("Connected as id: " + connection.threadId);
   managerPrompt();
 });
 
+//Main prompt and switch function that determines what user wants to do and calls corresponding function
 function managerPrompt() {
   inquirer
     .prompt({
@@ -52,20 +56,22 @@ function managerPrompt() {
 
 }
 
+//Function that pulls all products populated within the bamazon database, loops through the result, and displays items to user
 function viewAllProducts() {
-
+  //connection/callback function
   connection.query("SELECT * FROM products", function(err, res) {
     if (err) throw err;
     console.log("All items currently available in marketplace:\n");
     console.log("\n-----------------------------------------\n");
     for (var i = 0; i < res.length; i++) {
-      console.log(res[i].item_id + " | " + res[i].product_name + " | " + res[i].department_name + " | " + "$" +res[i].price + " | " + res[i].stock_quantity);
+      console.log("Id: ".bold + res[i].item_id + " | Product: ".bold + res[i].product_name + " | Department: ".bold + res[i].department_name + " | Price: ".bold + "$".bold +res[i].price + " | QOH: ".bold + res[i].stock_quantity);
     }
     console.log("\n-----------------------------------------\n");
   });
 
 }
 
+//Function that loops through mysql database and displays any item(s) having 5 or less on hand
 function viewLowInventory() {
 
   var query = "SELECT * FROM products";
@@ -75,7 +81,7 @@ function viewLowInventory() {
     console.log("\n-----------------------------------------\n");
     for (var i = 0; i < res.length; i++) {
       if (res[i].stock_quantity <= 5) {
-        console.log(res[i].item_id + " | " + res[i].product_name + " | " + res[i].department_name + " | " + "$" +res[i].price + " | " + res[i].stock_quantity);
+        console.log("Id: ".bold + res[i].item_id + " | Product: ".bold + res[i].product_name + " | Department: ".bold + res[i].department_name + " | Price: ".bold + "$".green.bold +res[i].price + " | QOH: ".bold + res[i].stock_quantity);
       }
     }
     console.log("\n-----------------------------------------\n");
@@ -84,6 +90,7 @@ function viewLowInventory() {
 
 }
 
+//Function that allows user to add inventory to a specific item
 function addInventory() {
   viewAllProducts();
   inquirer.prompt([
@@ -134,6 +141,7 @@ function addInventory() {
 
 }
 
+//Function that allows user to create and add new product to the Bamazon database
 function addNewProduct() {
   inquirer.prompt([
         {
